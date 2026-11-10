@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Find startups and companies by niche and region, with YC discovery and remote job feeds in one workspace.",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev-server.js",

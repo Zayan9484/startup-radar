@@ -85,6 +85,7 @@ startup-radar/
 ├── vercel.json                 # output folder, function limits, security headers
 ├── package.json                # "npm run dev"
 ├── .gitignore
+├── LICENSE                     # MIT licence
 └── README.md
 ```
 
@@ -156,6 +157,14 @@ No environment variables are needed. Every later `git push` to the main branch r
 - All text from external sources is HTML-escaped before display, and only `http(s)` links are allowed.
 - The watchlist never leaves your browser.
 - `vercel.json` adds basic security headers (`nosniff`, `X-Frame-Options`, `Referrer-Policy`).
+
+---
+
+## License
+
+[MIT](LICENSE) © 2026 Muhammad Zayan. You're free to use, change and share this code; please keep the copyright notice.
+
+The licence covers this project's code only. Job listings and company data belong to their original sources and follow those sources' terms (see [Data sources and attribution](#data-sources-and-attribution)).
 
 ---
 
