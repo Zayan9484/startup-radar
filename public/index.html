@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Startup Radar</title>
+  <meta name="description" content="Find startups and companies by niche and region, with YC discovery and remote job feeds together in one workspace." />
+  <meta name="theme-color" content="#4f46e5" />
+  <!-- Inline SVG favicon: a tiny radar, no extra file needed -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%234f46e5'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='white' stroke-width='2' opacity='.6'/%3E%3Cpath d='M16 16 L27 9' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='white'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <!--
+    Pick the theme BEFORE the page is drawn, so there's no white "flash"
+    when you use dark mode. Order: your saved choice → your device setting.
+  -->
+  <script>
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('startupRadar.theme'); } catch (e) {}
+      var prefersDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = saved === 'light' || saved === 'dark' ? saved : (prefersDark ? 'dark' : 'light');
+    })();
+  </script>
+</head>
+<body>
+  <!-- ============ HEADER ============ -->
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="/" aria-label="Startup Radar home">
+        <svg class="brand-icon" viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="15" class="brand-bg" />
+          <circle cx="16" cy="16" r="9" fill="none" stroke="currentColor" stroke-width="2" opacity=".55" />
+          <path d="M16 16 L27 9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+          <circle cx="16" cy="16" r="2.5" fill="currentColor" />
+        </svg>
+        <span>Startup Radar</span>
+      </a>
+      <p class="tagline">Startups, companies &amp; junior jobs by niche and region</p>
+      <!-- Light/dark switch. theme.js handles the click. -->
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Tabs: one button per view. app.js switches between them. -->
+    <nav class="container tabs" role="tablist" aria-label="Views">
+      <button class="tab" role="tab" id="tab-yc" aria-controls="panel-yc" data-tab="yc">YC Startups <span class="count" data-count="yc"></span></button>
+      <button class="tab" role="tab" id="tab-dir" aria-controls="panel-dir" data-tab="dir">Companies <span class="count" data-count="dir"></span></button>
+      <button class="tab" role="tab" id="tab-jobs" aria-controls="panel-jobs" data-tab="jobs">Junior Jobs <span class="count" data-count="jobs"></span></button>
+      <button class="tab" role="tab" id="tab-watch" aria-controls="panel-watch" data-tab="watch">★ Watchlist <span class="count" data-count="watch"></span></button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- ============ STEP 1: CHOOSE YOUR FOCUS (shared by every view) ============ -->
+    <section class="focus" aria-label="Choose your focus" id="focus">
+      <div class="focus-group">
+        <span class="focus-label">Niche</span>
+        <div class="chips" id="niche-chips" role="radiogroup" aria-label="Niche"><!-- filled by app.js --></div>
+      </div>
+      <div class="focus-group">
+        <label class="focus-label" for="region-select">Region</label>
+        <select id="region-select" class="select"><!-- filled by app.js --></select>
+      </div>
+    </section>
+
+    <!-- ============ VIEW: YC STARTUPS ============ -->
+    <section class="panel" role="tabpanel" id="panel-yc" aria-labelledby="tab-yc" hidden>
+      <div class="toolbar">
+        <input type="search" class="input grow" id="yc-search" placeholder="Search YC companies, e.g. kubernetes, identity, agents…" aria-label="Search YC companies" />
+        <select id="yc-batch" class="select" aria-label="YC batch"><option value="">All batches</option></select>
+        <label class="toggle"><input type="checkbox" id="yc-hiring" /> Hiring</label>
+        <label class="toggle"><input type="checkbox" id="yc-remote" /> Remote-friendly</label>
+        <label class="toggle"><input type="checkbox" id="yc-active" checked /> Active only</label>
+      </div>
+      <p class="summary" id="yc-summary" aria-live="polite"></p>
+      <div class="grid" id="yc-results"></div>
+      <div class="more"><button class="btn" id="yc-more" hidden>Show more</button></div>
+      <p class="fine-print">
+        YC data comes from <a href="https://github.com/yc-oss/api" target="_blank" rel="noopener">yc-oss/api</a>, an
+        unofficial, community-maintained copy of
+        <a href="https://www.ycombinator.com/companies" target="_blank" rel="noopener">Y Combinator’s public company directory</a>.
+        Not affiliated with Y Combinator. “Hiring” and “remote” labels come from YC’s listing. Check the company’s YC profile to confirm them.
+      </p>
+    </section>
+
+    <!-- ============ VIEW: COMPANY DIRECTORY ============ -->
+    <section class="panel" role="tabpanel" id="panel-dir" aria-labelledby="tab-dir" hidden>
+      <div class="toolbar">
+        <input type="search" class="input grow" id="dir-search" placeholder="Search companies or services…" aria-label="Search company directory" />
+        <select id="dir-kind" class="select" aria-label="Company type">
+          <option value="">All companies</option>
+          <option value="startup">Startups only</option>
+          <option value="established">Established companies</option>
+        </select>
+        <label class="toggle" title="Only companies whose live careers page lists open roles right now"><input type="checkbox" id="dir-hiring" /> Hiring now</label>
+        <label class="toggle"><input type="checkbox" id="dir-noyc" /> Not YC-backed</label>
+        <label class="toggle"><input type="checkbox" id="dir-remote" /> Remote-friendly</label>
+      </div>
+      <p class="summary" id="dir-summary" aria-live="polite"></p>
+      <div class="grid" id="dir-results"></div>
+      <p class="fine-print">
+        A hand-picked list of cloud, cybersecurity and automation companies, including many European startups that aren’t YC-backed, with links to each company’s official website and careers page.
+        For companies marked “Hiring”, open roles are counted live from their public careers board (Ashby or Greenhouse). The “YC-backed” label appears when a company’s website also appears in the YC data.
+        It doesn’t cover every company. Always check the careers page.
+      </p>
+    </section>
+
+    <!-- ============ VIEW: JUNIOR JOBS ============ -->
+    <section class="panel" role="tabpanel" id="panel-jobs" aria-labelledby="tab-jobs" hidden>
+      <div class="toolbar">
+        <input type="search" class="input grow" id="jobs-search" placeholder="Search job titles or companies…" aria-label="Search jobs" />
+        <select id="jobs-level" class="select" aria-label="Experience level">
+          <option value="not-senior">Hide senior roles</option>
+          <option value="junior">Junior &amp; entry only</option>
+          <option value="all">All levels</option>
+        </select>
+        <select id="jobs-source" class="select" aria-label="Job source"><option value="">All sources</option></select>
+        <label class="toggle" title="Also show roles that are open to candidates anywhere in the world"><input type="checkbox" id="jobs-worldwide" checked /> Include worldwide</label>
+      </div>
+      <div class="source-status" id="jobs-sources" aria-live="polite"></div>
+      <p class="summary" id="jobs-summary" aria-live="polite"></p>
+      <div class="list" id="jobs-results"></div>
+      <div class="more"><button class="btn" id="jobs-more" hidden>Show more</button></div>
+      <p class="fine-print">
+        Jobs are matched by title, and level labels are a best guess. Always read the original listing to confirm location, remote rules and experience required.
+        Listings belong to their sources, and every job links to its original page.
+      </p>
+    </section>
+
+    <!-- ============ VIEW: WATCHLIST ============ -->
+    <section class="panel" role="tabpanel" id="panel-watch" aria-labelledby="tab-watch" hidden>
+      <div class="toolbar">
+        <p class="grow muted">Saved companies stay in <strong>this browser only</strong> (localStorage). Nothing is sent to a server.</p>
+        <button class="btn" id="watch-export">Export JSON</button>
+        <button class="btn btn-danger" id="watch-clear">Clear all</button>
+      </div>
+      <div class="grid" id="watch-results"></div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER: attribution for every data source ============ -->
+  <footer class="footer">
+    <div class="container">
+      <p><strong>Data sources:</strong>
+        <a href="https://github.com/yc-oss/api" target="_blank" rel="noopener">yc-oss/api</a> (YC companies, unofficial) ·
+        Jobs from <a href="https://remotive.com" target="_blank" rel="noopener">Remotive</a>,
+        <a href="https://remoteok.com" target="_blank" rel="noopener">Remote OK</a>,
+        <a href="https://jobicy.com" target="_blank" rel="noopener">Jobicy</a>,
+        <a href="https://himalayas.app" target="_blank" rel="noopener">Himalayas</a> and
+        companies’ own careers pages (Ashby, Greenhouse, Lever) ·
+        Company directory from official company websites.
+      </p>
+      <p class="muted">Startup Radar doesn’t cover every startup or vacancy in the world. It’s an independent project, not affiliated with any of these sources.</p>
+    </div>
+  </footer>
+
+  <!-- Small pop-up message ("Saved to watchlist") -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- type="module" lets us use import/export between our JS files -->
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
