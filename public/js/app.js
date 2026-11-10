@@ -60,7 +60,8 @@ function hostOf(url) {
     return '';
   }
 }
-const isYcBacked = (c) => data.ycHosts.has(hostOf(c.website));
+// YC-backed if the directory says so (ycBatch), or if its website appears in the YC data.
+const isYcBacked = (c) => Boolean(c.ycBatch) || data.ycHosts.has(hostOf(c.website));
 
 /* Remember the niche/region/tab between visits (a convenience only). */
 const PREFS_KEY = 'startupRadar.prefs.v1';

@@ -17,7 +17,7 @@ No API keys, no database, no paid services. It runs on Vercel's free Hobby plan.
 | View | What it does |
 | --- | --- |
 | **YC Startups** | ~1,500 YC companies in the three niches. Filter by region, batch, *hiring*, *remote-friendly* and *active*, and search by name, tags or description. Each card links to the company's YC profile and website. |
-| **Companies** | A hand-picked directory of 57 cloud, security and automation companies, including **European startups that aren't YC-backed** (n8n, Parloa, Dust, H Company, Lovable, ElevenLabs, Tines, Nebius, Kestra…) and companies in Pakistan and the Middle East. For 28 of them, **open roles are counted live** from their public careers board. Filters: *startups only*, *hiring now*, *not YC-backed* and *remote-friendly*. Companies whose website also appears in the YC data are automatically labelled *YC-backed*. |
+| **Companies** | A hand-picked directory of 60 cloud, security and automation companies, including **European startups that aren't YC-backed** (n8n, Parloa, Dust, H Company, Lovable, ElevenLabs, ParakeetAI, Tines, Nebius, Kestra…) and companies in Pakistan and the Middle East. For 29 of them, **open roles are counted live** from their public careers board. Filters: *startups only*, *hiring now*, *not YC-backed* and *remote-friendly*. Companies whose website also appears in the YC data are automatically labelled *YC-backed*. |
 | **Junior Jobs** | Jobs from four remote job feeds plus the companies' own careers pages, filtered by niche (using the job **title**), region and experience level (*hide senior roles*, *junior & entry only*, or *all*). Every job links to its original listing and credits its source. |
 | **★ Watchlist** | Save any company with one click, even if it isn't hiring today. You can add personal notes and export the list as JSON. Everything is stored in **your browser only** (localStorage). |
 
@@ -145,7 +145,7 @@ No environment variables are needed. Every later `git push` to the main branch r
 ## Customising
 
 - **Add a niche or region:** add an entry to `NICHES` or `REGIONS` in [`public/js/taxonomy.js`](public/js/taxonomy.js). The chips, dropdown and filters update automatically.
-- **Add a company to the directory:** copy an entry in [`public/data/companies.json`](public/data/companies.json). Use region ids from `taxonomy.js`, niche ids `cloud`, `security` or `agentic`, and `kind` set to `startup` or `established`.
+- **Add a company to the directory:** copy an entry in [`public/data/companies.json`](public/data/companies.json). Use region ids from `taxonomy.js`, niche ids `cloud`, `security` or `agentic`, and `kind` set to `startup` or `established`. Optional fields: `ycBatch` (e.g. `"W25"`) labels a YC-backed company even if the YC data doesn't tag it in a niche, and `careersUrl` can be `null` when a company has no public careers page.
 - **Show live openings for a company:** add `"jobBoard": { "type": "ashby", "token": "n8n" }` to its entry in `companies.json`. `type` can be `ashby`, `greenhouse` or `lever`, and `token` is the last part of the board URL (`jobs.ashbyhq.com/<token>`, `job-boards.greenhouse.io/<token>`, `jobs.lever.co/<token>`). Restart `npm run dev` to load it.
 - **Add a new job feed:** create `api/_lib/sources/<name>.js` that exports `{ id, name, homepage, ttlMs, load() }` returning the common job shape, then add it to `SOURCES` in [`api/jobs.js`](api/jobs.js). Check the feed's terms first.
 

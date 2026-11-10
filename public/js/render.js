@@ -146,12 +146,13 @@ export function dirCard(c, saved, { board = null, loading = false, ycBacked = fa
     <div class="meta">
       ${hiringBadge(c, board, loading)}
       ${c.kind === 'startup' ? '<span class="tag tag-accent">Startup</span>' : ''}
-      ${ycBacked ? '<span class="tag tag-warn" title="Also listed in the YC directory">YC-backed</span>' : ''}
+      ${ycBacked ? `<span class="tag tag-warn" title="Also listed in the YC directory">${c.ycBatch ? `YC ${e(c.ycBatch)}` : 'YC-backed'}</span>` : ''}
+      ${!c.careersUrl ? '<span class="tag" title="We could not find a public careers or jobs page">No public careers page</span>' : ''}
       ${c.remote ? '<span class="tag tag-info">Remote-friendly</span>' : ''}
       ${nicheTags(c.niches)}
     </div>
     <div class="card-foot">
-      ${out(live ? board.boardUrl : c.careersUrl, live ? 'Open roles' : 'Careers')}
+      ${live ? out(board.boardUrl, 'Open roles') : c.careersUrl ? out(c.careersUrl, 'Careers') : ''}
       ${out(c.website, 'Website')}
       ${live && board.open ? `<button class="link-btn" data-action="company-jobs" data-name="${e(c.name)}">Matching jobs →</button>` : ''}
       <span class="via">Source: ${live ? `official careers page (${e(board.ats)})` : 'official website'}</span>
@@ -233,7 +234,7 @@ export const ycSnapshot = (c) => ({
 export const dirSnapshot = (c) => ({
   id: c.id, kind: 'dir', name: c.name, subtitle: c.hq, description: c.services,
   niches: c.niches, sourceLabel: 'official website',
-  links: [{ label: 'Careers', url: c.careersUrl }, { label: 'Website', url: c.website }],
+  links: [{ label: 'Careers', url: c.careersUrl }, { label: 'Website', url: c.website }].filter((l) => l.url),
 });
 
 export const jobCompanyId = (j) => `job-co:${(j.company || j.title).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
